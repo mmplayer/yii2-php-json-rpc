@@ -105,7 +105,7 @@ class Server
     private function getRequest(array $json)
     {
         // more than one
-        if (isset($json[1])) {
+        if (is_array($json)) {
             $request = new Batch($json);
         } elseif (false === isset($json['id'])) {
             $request = new Notification($json);
