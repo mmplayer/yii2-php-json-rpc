@@ -25,7 +25,7 @@ class Request implements RequestInterface
      *
      * @var array
      */
-    private $params = [];
+    private $params = array();
 
     /**
      * Holds JSON request object.
@@ -46,7 +46,7 @@ class Request implements RequestInterface
 
         $this->id     = isset($json['id'])     ? $json['id']     : null;
         $this->method = isset($json['method']) ? $json['method'] : null;
-        $this->params = isset($json['params']) ? $json['params'] : [];
+        $this->params = isset($json['params']) ? $json['params'] : array();
     }
 
     /**
@@ -56,7 +56,7 @@ class Request implements RequestInterface
      */
     public function getRequests()
     {
-        return [$this];
+        return array($this);
     }
 
     /**

@@ -9,24 +9,35 @@ class Batch extends Request
      *
      * @var array of Request
      */
-    private $requests = [];
+    private $requests = array();
+
+    /**
+     * Handle batch request item callback
+     *
+     * @param  array $json
+     * @return void
+     */
+    private function callback($json){
+        $json = (array)$json;
+        if (isset($json['id'])) {
+            $this->requests[] = new Request($json);
+        } else {
+            $this->requests[] = new Notification($json);
+        }
+    }
 
     /**
      * Constructor, sets JSON request.
+     *
+     * Method is called through call_user_function
+     * to make it work on PHP5.3
      *
      * @param  array $json
      * @return void
      */
     public function __construct(array $json)
     {
-        array_walk($json, function ($json) {
-            $json = (array)$json;
-            if (isset($json['id'])) {
-                $this->requests[] = new Request($json);
-            } else {
-                $this->requests[] = new Notification($json);
-            }
-        });
+        array_walk($json, array($this, 'callback'));
     }
 
     /**

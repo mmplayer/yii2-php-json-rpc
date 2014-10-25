@@ -5,7 +5,10 @@ use trifs\jsonrpc\Server\Request\RequestInterface;
 use trifs\jsonrpc\Server\Request\Batch;
 use trifs\jsonrpc\Server\Request\Notification;
 use trifs\jsonrpc\Server\Request\Request;
-
+import("trifs/jsonrpc/Server/Request/RequestInterface",VENDOR_PATH,".php");
+import("trifs/jsonrpc/Server/Request/Request",VENDOR_PATH,".php");
+import("trifs/jsonrpc/Server/Request/Batch",VENDOR_PATH,".php");
+import("trifs/jsonrpc/Server/Request/Notification",VENDOR_PATH,".php");
 class Server
 {
     const ERROR_PARSE_CODE       = -32700;
@@ -41,8 +44,12 @@ class Server
      * @param  callable $invoker
      * @throws \InvalidArgumentException if $input is not a string
      */
-    public function __construct($input, callable $invoker)
+    public function __construct($input, $invoker)
     {
+        // should assert() be used instead?
+        if (!is_callable($invoker)) {
+            throw new \InvalidArgumentException('$invoker has to be a callable.');
+        }
         // should assert() be used instead?
         if (false === is_string($input)) {
             throw new \InvalidArgumentException('$input has to be a string.');
@@ -62,12 +69,16 @@ class Server
         $json = json_decode($this->input, true);
 
         if (empty($json)) {
-            $result = $this->getErrorResponse(null, self::ERROR_PARSE_CODE, self::MESSAGE_ERROR_PARSE_CODE);
+	    if(is_array($json)){
+                $result = $this->getErrorResponse(null, self::ERROR_INVALID_REQUEST, self::MESSAGE_ERROR_INVALID_REQUEST);
+	    } else {
+                $result = $this->getErrorResponse(null, self::ERROR_PARSE_CODE, self::MESSAGE_ERROR_PARSE_CODE);
+	    }
         } else {
             $request = $this->getRequest($json);
 
             if ($request->isBatch()) {
-                $result = [];
+                $result = array();
                 foreach ($request->getRequests() as $request) {
                     $result[] = $this->invoke($request);
                 }
@@ -114,14 +125,14 @@ class Server
      */
     private function getErrorResponse($id, $code, $message)
     {
-        return [
+        return array(
             'jsonrpc' => '2.0',
             'id'      => $id,
-            'error'   => [
+            'error'   => array(
                 'code'    => $code,
                 'message' => $message,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -135,7 +146,7 @@ class Server
         try {
             $request->validate();
 
-            $result = [
+            $result = array(
                 'jsonrpc' => '2.0',
                 'id'      => $request->getId(),
                 'result'  => call_user_func(
@@ -143,7 +154,7 @@ class Server
                     $request->getMethod(),
                     $request->getParameters()
                 ),
-            ];
+            );
         } catch (\Exception $e) {
             $result = $this->getErrorResponse(
                 $request->getId(),
