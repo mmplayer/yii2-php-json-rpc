@@ -23,7 +23,8 @@ class IndexAction extends Action {
     $server=new jsonrpc\Server($input, $invoker);
     $rpc_result=$server->run();
     if(!is_null($rpc_result)){
-      $this->show($rpc_result,'utf-8','application/json');
+      header('Content-Type:text/html; charset=utf-8');
+      exit($rpc_result);
     }
   }
 }
