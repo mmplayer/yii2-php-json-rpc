@@ -1,7 +1,7 @@
 <?php
 namespace JsonRpc\Handler;
 
-class Caculator {
+class Caculator extends \Action{
     public function add($a, $b){
 	return $a + $b;
     }
