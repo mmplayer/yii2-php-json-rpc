@@ -1,5 +1,5 @@
 {
-    "name": "trifs/jsonrpc",
+    "name": "michalliu/jsonrpc",
     "description": "A simple JSON-RPC client and server",
     "keywords": [
         "json",
@@ -21,7 +21,7 @@
         ]
     },
     "require": {
-        "php": ">=5.5"
+        "php": ">=5.4"
     },
     "require-dev": {
         "phpunit/phpunit":           "4.*",
