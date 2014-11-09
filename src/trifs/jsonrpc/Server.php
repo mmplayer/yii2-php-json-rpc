@@ -41,7 +41,7 @@ class Server
      * @param  callable $invoker
      * @throws \InvalidArgumentException if $input is not a string
      */
-    public function __construct($input, callable $invoker)
+    public function __construct($input, $invoker)
     {
         // should assert() be used instead?
         if (false === is_string($input)) {
@@ -94,7 +94,7 @@ class Server
     private function getRequest(array $json)
     {
         // more than one
-        if (is_array($json)) {
+        if (isset($json[0])) {
             $request = new Batch($json);
         } elseif (false === isset($json['id'])) {
             $request = new Notification($json);
@@ -144,6 +144,12 @@ class Server
                     $request->getParameters()
                 ),
             ];
+        } catch (\ReflectionException $e) { // on class not found
+            $result = $this->getErrorResponse(
+                $request->getId(),
+                self::ERROR_METHOD_NOT_FOUND,
+                self::MESSAGE_ERROR_METHOD_NOT_FOUND
+            );
         } catch (\Exception $e) {
             $result = $this->getErrorResponse(
                 $request->getId(),
