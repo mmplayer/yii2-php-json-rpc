@@ -34,12 +34,16 @@ class Executor {
                 array_map(["yii\\helpers\\BaseInflector","camelize"],
                     $methodGroup)
             );
+            $klass=self::$handlerNamespace . "\\handlers\\" . $klassPath;
+            Yii::info("JSONRPC\n class => ". $klass . "\n method => " . $methodName . "\n params => " . implode(",", $params));
             return self::invoke([
-                "class" => self::$handlerNamespace . "\\handlers\\" . $klassPath
+                "class" => $klass
             ], null, $methodName, $params);
         } else {
+            $klass=self::$handlerNamespace . "\\handlers\\DefaultHandler";
+            Yii::info("JSONRPC\n class => ". $klass . "\n method => " . $method . "\n params => " . implode(",", $params));
             return self::invoke([
-                "class" => self::$handlerNamespace . "\\handlers\\DefaultHandler"
+                "class" => $klass
             ], null, $method, $params);
         }
     }

@@ -1,10 +1,12 @@
 <?php
 namespace trifs\jsonrpc;
 
+use Yii;
 use trifs\jsonrpc\Server\Request\RequestInterface;
 use trifs\jsonrpc\Server\Request\Batch;
 use trifs\jsonrpc\Server\Request\Notification;
 use trifs\jsonrpc\Server\Request\Request;
+use yii\base\UnknownClassException;
 
 class Server
 {
@@ -145,17 +147,27 @@ class Server
                 ),
             ];
         } catch (\ReflectionException $e) { // on class not found
+            Yii::error("JSONRPC_ERROR\n".$e); // write log
             $result = $this->getErrorResponse(
                 $request->getId(),
                 self::ERROR_METHOD_NOT_FOUND,
                 self::MESSAGE_ERROR_METHOD_NOT_FOUND
             );
         } catch (\Exception $e) {
-            $result = $this->getErrorResponse(
-                $request->getId(),
-                $e->getCode(),
-                $e->getMessage()
-            );
+            Yii::error("JSONRPC_ERROR\n".$e); // write log
+            if ($e instanceof UnknownClassException) {
+                $result = $this->getErrorResponse(
+                    $request->getId(),
+                    self::ERROR_METHOD_NOT_FOUND,
+                    self::MESSAGE_ERROR_METHOD_NOT_FOUND
+                );
+            } else {
+                $result = $this->getErrorResponse(
+                    $request->getId(),
+                    $e->getCode(),
+                    $e->getMessage()
+                );
+            }
         }
 
         if ($request->isNotification() && empty($result['error'])) {
