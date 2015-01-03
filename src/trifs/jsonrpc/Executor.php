@@ -13,11 +13,21 @@ class Executor extends Object {
     // under which namespace the handlers will execute
     private $_handlerNamespace;
 
+    // extra data
+    private $_bundle;
+
     // setter
     public function setHandlerNamespace($ns){
         $this->_handlerNamespace = $ns;
     }
 
+    public function setBundle($bundle){
+        return $this->_bundle = $bundle;
+    }
+
+    public function getBundle(){
+        return $this->_bundle;
+    }
     /**
      * @param $type string|array|callable $type the object type.
      * @param $params array $params the constructor parameters
@@ -58,19 +68,28 @@ class Executor extends Object {
             $klass=$this->_handlerNamespace . "\\" . $klassPath;
             Yii::info(self::$TAG . "\n class => ". $klass . "\n method => " . $methodName . "\n params => " . implode(",", $params));
             return $this->invoke([
-                "class" => $klass
+                "class" => $klass,
+                "bundle" => $this->bundle
             ], null, $methodName, $params);
         } else {
             $klass=$this->_handlerNamespace . "\\". "DefaultHandler";
             Yii::info(self::$TAG . "\n class => ". $klass . "\n method => " . $method . "\n params => " . implode(",", $params));
             return $this->invoke([
-                "class" => $klass
+                "class" => $klass,
+                "bundle" => $this->bundle
             ], null, $method, $params);
         }
     }
 
     public function execute($input) {
         $server = new Server($input, [$this,"invoker"]);
+        return $server->run();
+    }
+
+    public function error($input, $message="unknown error", $code=-1){
+        $server = new Server($input, function ($method, $params) use ($code, $message) {
+            throw new Exception("Failed to execute: \"". $method . "\" " . $message, $code);
+        });
         return $server->run();
     }
 }
