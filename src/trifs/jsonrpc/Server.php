@@ -134,39 +134,62 @@ class Server
      */
     private function invoke(RequestInterface $request)
     {
-        try {
-            $request->validate();
+        if (defined('YII_DEBUG') && YII_DEBUG == true){
+            try {
+                $request->validate();
 
-            $result = [
-                'jsonrpc' => '2.0',
-                'id'      => $request->getId(),
-                'result'  => call_user_func(
-                    $this->invoker,
-                    $request->getMethod(),
-                    $request->getParameters()
-                ),
-            ];
-        } catch (\ReflectionException $e) { // on class not found
-            Yii::error("JSONRPC_ERROR\n".$e); // write log
-            $result = $this->getErrorResponse(
-                $request->getId(),
-                self::ERROR_METHOD_NOT_FOUND,
-                self::MESSAGE_ERROR_METHOD_NOT_FOUND
-            );
-        } catch (\Exception $e) {
-            Yii::error("JSONRPC_ERROR\n".$e); // write log
-            if ($e instanceof UnknownClassException) {
+                $result = [
+                    'jsonrpc' => '2.0',
+                    'id'      => $request->getId(),
+                    'result'  => call_user_func(
+                        $this->invoker,
+                        $request->getMethod(),
+                        $request->getParameters()
+                    ),
+                ];
+            } catch (\ReflectionException $e) { // on class not found
+                Yii::error("JSONRPC_ERROR\n".$e); // write log
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
                     self::MESSAGE_ERROR_METHOD_NOT_FOUND
                 );
-            } else {
+            }
+        } else {
+            try {
+                $request->validate();
+
+                $result = [
+                    'jsonrpc' => '2.0',
+                    'id'      => $request->getId(),
+                    'result'  => call_user_func(
+                        $this->invoker,
+                        $request->getMethod(),
+                        $request->getParameters()
+                    ),
+                ];
+            } catch (\ReflectionException $e) { // on class not found
+                Yii::error("JSONRPC_ERROR\n".$e); // write log
                 $result = $this->getErrorResponse(
                     $request->getId(),
-                    $e->getCode(),
-                    $e->getMessage()
+                    self::ERROR_METHOD_NOT_FOUND,
+                    self::MESSAGE_ERROR_METHOD_NOT_FOUND
                 );
+            } catch (\Exception $e) {
+                Yii::error("JSONRPC_ERROR\n".$e); // write log
+                if ($e instanceof UnknownClassException) {
+                    $result = $this->getErrorResponse(
+                        $request->getId(),
+                        self::ERROR_METHOD_NOT_FOUND,
+                        self::MESSAGE_ERROR_METHOD_NOT_FOUND
+                    );
+                } else {
+                    $result = $this->getErrorResponse(
+                        $request->getId(),
+                        $e->getCode(),
+                        $e->getMessage()
+                    );
+                }
             }
         }
 
