@@ -3,8 +3,8 @@ namespace trifs\jsonrpc;
 
 use Yii;
 use trifs\jsonrpc\Server;
+use trifs\jsonrpc\JSONRPCError;
 use yii\base\Object;
-use yii\base\Exception;
 
 class Executor extends Object {
 
@@ -48,12 +48,12 @@ class Executor extends Object {
             $requiredParamsCount = $reflectionMethod->getNumberOfRequiredParameters();
             $methodParamsCount=count($methodParams);
             if ($methodParamsCount < $requiredParamsCount) {
-                throw new Exception(Server::MESSAGE_ERROR_INVALID_PARAMS,Server::ERROR_INVALID_PARAMS);
+                throw new JSONRPCError(Server::MESSAGE_ERROR_INVALID_PARAMS,Server::ERROR_INVALID_PARAMS);
             } else {
                 return call_user_func_array([$component, $method], $methodParams);
             }
         } else {
-            throw new Exception(Server::MESSAGE_ERROR_METHOD_NOT_FOUND,Server::ERROR_METHOD_NOT_FOUND);
+            throw new JSONRPCError(Server::MESSAGE_ERROR_METHOD_NOT_FOUND,Server::ERROR_METHOD_NOT_FOUND);
         }
     }
 
@@ -88,7 +88,7 @@ class Executor extends Object {
 
     public function error($input, $message="unknown error", $code=-1){
         $server = new Server($input, function ($method, $params) use ($code, $message) {
-            throw new Exception("Failed to execute: \"". $method . "\" " . $message, $code);
+            throw new JSONRPCError("Failed to execute: \"". $method . "\" " . $message, $code);
         });
         return $server->run();
     }

@@ -6,6 +6,7 @@ use trifs\jsonrpc\Server\Request\RequestInterface;
 use trifs\jsonrpc\Server\Request\Batch;
 use trifs\jsonrpc\Server\Request\Notification;
 use trifs\jsonrpc\Server\Request\Request;
+use trifs\jsonrpc\JSONRPCError;
 use yii\base\UnknownClassException;
 
 class Server
@@ -148,13 +149,26 @@ class Server
                     ),
                 ];
             } catch (\ReflectionException $e) { // on class not found
-                Yii::error("JSONRPC_ERROR\n".$e); // write log
+                Yii::error("JSONRPC_ERROR\n" . $e);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
                     self::MESSAGE_ERROR_METHOD_NOT_FOUND
                 );
-            }
+            } catch (UnknownClassException $e){
+                Yii::error("JSONRPC_ERROR\n" . $e);
+                $result = $this->getErrorResponse(
+                    $request->getId(),
+                    self::ERROR_METHOD_NOT_FOUND,
+                    self::MESSAGE_ERROR_METHOD_NOT_FOUND
+                );
+            } catch (JSONRPCError $e) { // A "NORMAL" error message display to user
+                $result = $this->getErrorResponse(
+                    $request->getId(),
+                    $e->getCode(),
+                    $e->getMessage()
+                );
+            } // Don't catch regular PHP regular \Exception in development mode
         } else {
             try {
                 $request->validate();
@@ -169,27 +183,32 @@ class Server
                     ),
                 ];
             } catch (\ReflectionException $e) { // on class not found
-                Yii::error("JSONRPC_ERROR\n".$e); // write log
+                Yii::error("JSONRPC_ERROR\n" . $e);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
                     self::MESSAGE_ERROR_METHOD_NOT_FOUND
                 );
-            } catch (\Exception $e) {
-                Yii::error("JSONRPC_ERROR\n".$e); // write log
-                if ($e instanceof UnknownClassException) {
-                    $result = $this->getErrorResponse(
-                        $request->getId(),
-                        self::ERROR_METHOD_NOT_FOUND,
-                        self::MESSAGE_ERROR_METHOD_NOT_FOUND
-                    );
-                } else {
-                    $result = $this->getErrorResponse(
-                        $request->getId(),
-                        $e->getCode(),
-                        $e->getMessage()
-                    );
-                }
+            } catch (UnknownClassException $e){
+                Yii::error("JSONRPC_ERROR\n" . $e);
+                $result = $this->getErrorResponse(
+                    $request->getId(),
+                    self::ERROR_METHOD_NOT_FOUND,
+                    self::MESSAGE_ERROR_METHOD_NOT_FOUND
+                );
+            } catch (JSONRPCError $e) { // A "NORMAL" error message display to user
+                $result = $this->getErrorResponse(
+                    $request->getId(),
+                    $e->getCode(),
+                    $e->getMessage()
+                );
+            } catch (\Exception $e) { // unexpected exception occured at non-dev mode
+                Yii::error("JSONRPC_ERROR\n".$e);
+                $result = $this->getErrorResponse(
+                    $request->getId(),
+                    $e->getCode(),
+                    $e->getMessage()
+                );
             }
         }
 

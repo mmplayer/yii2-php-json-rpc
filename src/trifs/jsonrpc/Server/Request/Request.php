@@ -2,6 +2,7 @@
 namespace trifs\jsonrpc\Server\Request;
 
 use trifs\jsonrpc\Server;
+use trifs\jsonrpc\JSONRPCError;
 
 class Request implements RequestInterface
 {
@@ -113,7 +114,7 @@ class Request implements RequestInterface
      * Validates request.
      *
      * @return void
-     * @throws \Exception if request is invalid
+     * @throws JSONRPCError if request is invalid
      */
     public function validate()
     {
@@ -148,7 +149,7 @@ class Request implements RequestInterface
         }
 
         if ($code) {
-            throw new \Exception($message, $code);
+            throw new JSONRPCError($message, $code);
         }
     }
 }
