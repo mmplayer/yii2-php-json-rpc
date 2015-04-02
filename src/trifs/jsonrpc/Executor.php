@@ -70,18 +70,26 @@ class Executor extends Object {
                     $methodGroup)
             );
             $klass=$this->_handlerNamespace . "\\" . $klassPath;
+            $bundleProperty = new \ReflectionProperty($klass,"bundle");
+            $config["class"] = $klass;
+            // We only pass bundles from controller only if there is a field named bundle and it's public.
+            // WARNING: You should NOT use getter provide by yii framework in JSONRPC handlers.
+            // because it must be public and accessible by any JSONRPC call. eg. if public getBundle() exists in handlers
+            // anyone can call it then your bundle info is leaked.
+            if ($bundleProperty->isPublic()){
+                $config["bundle"] =  $this->bundle;
+            }
             Yii::info(self::$TAG . "\n class => ". $klass . "\n method => " . $methodName . "\n params => " . implode(",", $params));
-            return $this->invoke([
-                "class" => $klass,
-                "bundle" => $this->bundle
-            ], null, $methodName, $params);
+            return $this->invoke($config, null, $methodName, $params);
         } else {
             $klass=$this->_handlerNamespace . "\\". "DefaultHandler";
+            $bundleProperty = new \ReflectionProperty($klass,"bundle");
+            $config["class"] = $klass;
+            if ($bundleProperty->isPublic()){
+                $config["bundle"] =  $this->bundle;
+            }
             Yii::info(self::$TAG . "\n class => ". $klass . "\n method => " . $method . "\n params => " . implode(",", $params));
-            return $this->invoke([
-                "class" => $klass,
-                "bundle" => $this->bundle
-            ], null, $method, $params);
+            return $this->invoke($config, null, $method, $params);
         }
     }
 
