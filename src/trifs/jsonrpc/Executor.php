@@ -45,12 +45,16 @@ class Executor extends Object {
         $component = Yii::createObject($type, $params);
         if (method_exists($component, $method) && is_callable([$component, $method])) {
             $reflectionMethod = new \ReflectionMethod($component, $method);
-            $requiredParamsCount = $reflectionMethod->getNumberOfRequiredParameters();
-            $methodParamsCount=count($methodParams);
-            if ($methodParamsCount < $requiredParamsCount) {
-                throw new JSONRPCError(Server::MESSAGE_ERROR_INVALID_PARAMS,Server::ERROR_INVALID_PARAMS);
+            if ($reflectionMethod->isPublic()) {
+                $requiredParamsCount = $reflectionMethod->getNumberOfRequiredParameters();
+                $methodParamsCount=count($methodParams);
+                if ($methodParamsCount < $requiredParamsCount) {
+                    throw new JSONRPCError(Server::MESSAGE_ERROR_INVALID_PARAMS,Server::ERROR_INVALID_PARAMS);
+                } else {
+                    return call_user_func_array([$component, $method], $methodParams);
+                }
             } else {
-                return call_user_func_array([$component, $method], $methodParams);
+                throw new JSONRPCError(Server::MESSAGE_ERROR_METHOD_NOT_FOUND,Server::ERROR_METHOD_NOT_FOUND);
             }
         } else {
             throw new JSONRPCError(Server::MESSAGE_ERROR_METHOD_NOT_FOUND,Server::ERROR_METHOD_NOT_FOUND);
