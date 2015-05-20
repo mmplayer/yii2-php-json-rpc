@@ -9,8 +9,6 @@ use yii\base\Object;
 
 class Executor extends Object {
 
-    private static $TAG="JSONRPC";
-
     // under which namespace the handlers will execute
     private $_handlerNamespace;
 
@@ -93,7 +91,7 @@ class Executor extends Object {
             if ($bundleProperty && $bundleProperty->isPublic()){
                 $config["bundle"] =  $this->bundle;
             }
-            Yii::info(self::$TAG . "\n class => ". $klass . "\n method => " . $methodName . "\n params => " . implode(",", $params));
+            Yii::info("class => ". $klass . "\n method => " . $methodName . "\n params => " . implode(",", $params), __METHOD__);
             return $this->invoke($config, null, $methodName, $params);
         } else {
             $klass=$this->_handlerNamespace . "\\". "DefaultHandler";
@@ -106,7 +104,7 @@ class Executor extends Object {
             if ($bundleProperty && $bundleProperty->isPublic()){
                 $config["bundle"] =  $this->bundle;
             }
-            Yii::info(self::$TAG . "\n class => ". $klass . "\n method => " . $method . "\n params => " . implode(",", $params));
+            Yii::info("class => ". $klass . "\n method => " . $method . "\n params => " . implode(",", $params), __METHOD__);
             return $this->invoke($config, null, $method, $params);
         }
     }

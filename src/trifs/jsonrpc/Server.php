@@ -149,14 +149,14 @@ class Server
                     ),
                 ];
             } catch (\ReflectionException $e) { // on class not found
-                Yii::error("JSONRPC_ERROR\n" . $e);
+                Yii::error($e, __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
                     self::MESSAGE_ERROR_METHOD_NOT_FOUND
                 );
             } catch (UnknownClassException $e){
-                Yii::error("JSONRPC_ERROR\n" . $e);
+                Yii::error($e, __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
@@ -183,14 +183,14 @@ class Server
                     ),
                 ];
             } catch (\ReflectionException $e) { // on class not found
-                Yii::error("JSONRPC_ERROR\n" . $e);
+                Yii::error($e, __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
                     self::MESSAGE_ERROR_METHOD_NOT_FOUND
                 );
             } catch (UnknownClassException $e){
-                Yii::error("JSONRPC_ERROR\n" . $e);
+                Yii::error($e, __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
@@ -203,7 +203,7 @@ class Server
                     $e->getMessage()
                 );
             } catch (\Exception $e) { // unexpected exception occured at non-dev mode
-                Yii::error("JSONRPC_ERROR\n".$e);
+                Yii::error($e, __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     $e->getCode(),
