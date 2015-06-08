@@ -128,6 +128,14 @@ class Server
     }
 
     /**
+     *
+     * @param $e \Exception
+     * @return exception message
+     */
+    private function formatErrorMessage($e){
+        return "Exception at " . $e->getFile() . "(" . $e->getLine() . ":" . $e->getCode() . ") " . $e->getMessage() ;
+    }
+    /**
      * Invokes the request.
      *
      * @param  RequestInterface $request
@@ -149,14 +157,14 @@ class Server
                     ),
                 ];
             } catch (\ReflectionException $e) { // on class not found
-                Yii::error($e, __METHOD__);
+                Yii::error($this->formatErrorMessage($e), __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
                     self::MESSAGE_ERROR_METHOD_NOT_FOUND
                 );
             } catch (UnknownClassException $e){
-                Yii::error($e, __METHOD__);
+                Yii::error($this->formatErrorMessage($e), __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
@@ -183,14 +191,14 @@ class Server
                     ),
                 ];
             } catch (\ReflectionException $e) { // on class not found
-                Yii::error($e, __METHOD__);
+                Yii::error($this->formatErrorMessage($e), __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
                     self::MESSAGE_ERROR_METHOD_NOT_FOUND
                 );
             } catch (UnknownClassException $e){
-                Yii::error($e, __METHOD__);
+                Yii::error($this->formatErrorMessage($e), __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     self::ERROR_METHOD_NOT_FOUND,
@@ -203,7 +211,7 @@ class Server
                     $e->getMessage()
                 );
             } catch (\Exception $e) { // unexpected exception occured at non-dev mode
-                Yii::error($e, __METHOD__);
+                Yii::error($this->formatErrorMessage($e), __METHOD__);
                 $result = $this->getErrorResponse(
                     $request->getId(),
                     $e->getCode(),
